@@ -6,6 +6,7 @@ const cors = require("cors");
 const middleware = require("./utils/middleware");
 const logger = require("./utils/logger");
 const mongoose = require("mongoose");
+require('express-async-errors')
 
 mongoose.set("strictQuery", config.MONGODB_URI);
 
