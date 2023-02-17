@@ -29,19 +29,26 @@ const errorHandler = (error, req, res, next) => {
 
   next(error);
 };
-const tokenExtractor = (req, res, next) => {
-  const authorization = req.get('authorization')
-  if(authorization && authorization.startsWith('Bearer ')) {
-    return authorization.replace('Bearer ', '')
+const tokenExtractor = (request, response, next) => {
+  const authorization = request.get('authorization')
+
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+      request["token"] = authorization.substring(7)
   }
   next()
 }
-const userExtractor = async (req, res, next) => {
-  const decodedToken = jwt.verify(req.token, process.env.SECRET)
-  if(!decodedToken.id){
-    return res.status(401).json({error: 'Token invalid'})
+
+const userExtractor = async (request, response, next) => {
+  if (!request.token) {
+    request.user = null
+  } else {
+    const decodedToken = jwt.verify(request.token, process.env.SECRET)
+    if (!decodedToken.id) {
+      request.user = null
+    } else {
+      request.user = await User.findById(decodedToken.id)
+    }
   }
-  req.user = await User.findById(decodedToken.id)
   next()
 }
 
